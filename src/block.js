@@ -15,7 +15,7 @@ function seedMines(blocks = [], x = 10, y = 10, minesAmount = 10) {
   for (let i = 0; i < minesAmount; i++) {
     let xPosition = Math.floor(Math.random() * x)
     let yPosition = Math.floor(Math.random() * y)
-    console.log('xPosition', xPosition, 'yPosition', yPosition)
+    // console.log('xPosition', xPosition, 'yPosition', yPosition)
     if (blocks[xPosition][yPosition].mines) {
       i--
       continue
@@ -23,7 +23,7 @@ function seedMines(blocks = [], x = 10, y = 10, minesAmount = 10) {
       blocks[xPosition][yPosition].mines = true
     }
   }
-  console.log('blocks', blocks)
+  // console.log('blocks', blocks)
   return blocks
 }
 
@@ -45,6 +45,37 @@ function countAdjacentMines(blocks = [], x = 10, y = 10) {
       }
     }
   }
-  console.log('blocks', blocks)
+  // console.log('blocks', blocks)
   return blocks
+}
+
+export function revealBlock(blocks = [], x = 10, y = 10) {
+  if(!blocks[x] || !blocks[x][y]) {
+    // console.error('block not found', x, y)
+    return
+  }
+  if(blocks[x][y].revealed) {
+    // console.log('block already revealed', x, y)
+    return
+  }
+  blocks[x][y].revealed = true
+  for(let i = -1; i <= 1; i++) {
+    for(let j = -1; j <= 1; j++) {
+      if(blocks[x + i] && blocks[x + i][y + j]) {
+        if(blocks[x + i][y + j].mines) {
+          return
+        } else {
+          revealBlock(blocks, x + i, y + j)
+        }
+      }
+    }
+  }
+}
+
+export function checkLose(blocks = [], x = 10, y = 10) {
+  return blocks.some(row => row.some(block => block.revealed && block.mines))
+}
+
+export function checkWin(blocks = [], x = 10, y = 10) {
+  return blocks.every(row => row.every(block => block.flagged && block.mines))
 }
