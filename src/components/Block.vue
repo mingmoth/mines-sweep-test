@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
   block: {
     type: Object,
     default: () => ({
@@ -10,20 +10,41 @@ defineProps({
       flagged: false,
       adjacent: 0,
     })
-  }
+  },
+  disabled: Boolean
 })
 
-const emit = defineEmits(['reveal', 'flag'])
+const emits = defineEmits(['reveal', 'flag'])
+
+function reveal() {
+  if(props.disabled) return
+  emits('reveal')
+}
+
+function flag() {
+  if(props.disabled) return
+  emits('flag')
+}
+
+const blockDisplay = computed(() => {
+  if(props.block?.flagged) return 'F'
+  if(props.block?.revealed) return props.block.mines ? '@' : props.block.adjacent ? props.block.adjacent : ''
+})
 
 </script>
 
 <template>
   <div
-    @click="emit('reveal')"
-    @contextmenu="emit('flag')"
-    class="block"
+    @click="reveal"
+    @contextmenu.prevent="flag"
+    :class="[
+      'block',
+      disabled && 'block-disabled',
+      block.revealed ? 'block-revealed' : 'block-hidden',
+      block.mines && block.revealed && 'block-mine',
+    ]"
   >
-    {{ block.mines ? '*' : block.adjacent ? block.adjacent : '' }}
+    {{ blockDisplay }}
   </div>
 </template>
 
@@ -41,7 +62,32 @@ const emit = defineEmits(['reveal', 'flag'])
   justify-content: center;
 }
 
-.block:hover {
+.block-hidden:hover {
   background-color: darkgray;
+}
+
+.block-revealed {
+  background-color: #e4e6e8;
+  border: 1px solid lightgray;
+}
+
+.block-mine {
+  background-color: salmon;
+}
+
+.block-disabled {
+  cursor: not-allowed;
+}
+
+.block-disabled:hover {
+  background-color: lightgray;
+}
+
+.block-revealed:hover {
+  background-color: #e4e6e8;
+}
+
+.block-mine:hover {
+  background-color: salmon;
 }
 </style>
