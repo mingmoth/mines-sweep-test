@@ -2,7 +2,7 @@
 import { computed, nextTick, ref, watch, watchEffect } from 'vue'
 import Block from './components/Block.vue'
 import { checkLose, checkWin, generateBlocks, revealBlock } from './block'
-import useTimer from './useTimer'
+import useTimer from './composables/useTimer'
 
 const statuses = {
   ready: 'ready',
