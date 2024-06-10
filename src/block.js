@@ -77,5 +77,10 @@ export function checkLose(blocks = [], x = 10, y = 10) {
 }
 
 export function checkWin(blocks = [], x = 10, y = 10) {
-  return blocks.every(row => row.every(block => block.flagged && block.mines))
+  const collections = blocks.flat()
+  if (!collections.some(block => !block.mines && !block.revealed)) {
+    return true
+  } else {
+    return false
+  }
 }
