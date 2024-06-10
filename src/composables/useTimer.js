@@ -17,6 +17,9 @@ export default function useTimer() {
 
   function endCount() {
     clearInterval(interval.value)
+    interval.value = null
+    start.value = null
+    end.value = null
   }
 
   function count() {
