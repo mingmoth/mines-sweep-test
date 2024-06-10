@@ -1,7 +1,8 @@
 <script setup>
-import { nextTick, ref, watch, watchEffect } from 'vue'
+import { computed, nextTick, ref, watch, watchEffect } from 'vue'
 import Block from './components/Block.vue'
 import { checkLose, checkWin, generateBlocks, revealBlock } from './block'
+import useTimer from './useTimer'
 
 const statuses = {
   ready: 'ready',
@@ -38,6 +39,30 @@ const gameStatus = ref(statuses.ready)
 const gameLevel = ref(gameLevels.easy)
 const blocks = ref(generateBlocks(gameLevelSettings[gameLevel.value].width, gameLevelSettings[gameLevel.value].height, gameLevelSettings[gameLevel.value].mines))
 
+const isStart = computed(() => gameStatus.value === statuses.playing)
+
+const { count, startCount, seconds, endCount } = useTimer(isStart.value)
+
+const GameHint = computed(() => {
+  if(gameStatus.value === statuses.playing) {
+    return `Time: ${seconds.value}s`
+  } else if(gameStatus.value === statuses.ready) {
+    return 'Click to start'
+  } else {
+    return 'Start new game'
+  }
+})
+
+watch(() => isStart.value, () => {
+  console.log('watch', isStart.value)
+  if(isStart.value) {
+    startCount()
+    count()
+  } else {
+    endCount()
+  }
+})
+
 function startGame() {
   if(gameStatus.value === statuses.ready) {
     gameStatus.value = statuses.playing
@@ -58,7 +83,6 @@ watch(() => gameLevel.value, () => {
 })
 
 watchEffect(() => {
-  console.log('watchEffect')
   const status = gameStatus.value
   gameStatus.value = checkLose(blocks.value)
     ? statuses.lose
@@ -66,13 +90,10 @@ watchEffect(() => {
       ? statuses.won
         : status
   nextTick(() => {
-    if(gameStatus.value === statuses.lose) {
+    if(gameStatus.value === statuses.lose || gameStatus.value === statuses.won) {
+      endCount()
       setTimeout(() => {
-        alert('You lose!')
-      }, 200)
-    } else if(gameStatus.value === statuses.won) {
-      setTimeout(() => {
-        alert('You win!')
+        alert(`You ${ gameStatus.value }!`)
       }, 200)
     }
   })
@@ -85,6 +106,9 @@ watchEffect(() => {
   <div class="controls">
     <button @click="resetGame">New Game</button>
     <button v-for="level in Object.keys(gameLevels)" :key="level" @click="gameLevel = gameLevels[level]"> {{ level }}</button>
+  </div>
+  <div class="hint">
+    <span>{{ GameHint }}</span>
   </div>
   <div class="blocks">
     <div
@@ -111,6 +135,10 @@ watchEffect(() => {
   align-items: center;
   justify-content: space-between;
   gap: 4px;
+  margin-bottom: 20px;
+}
+
+.hint {
   margin-bottom: 20px;
 }
 
