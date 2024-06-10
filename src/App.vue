@@ -1,7 +1,7 @@
 <script setup>
 import { computed, nextTick, ref, watch, watchEffect } from 'vue'
 import Block from './components/Block.vue'
-import { checkLose, checkWin, generateBlocks, revealBlock } from './block'
+import { checkLose, checkWin, generateBlocks, revealBlock } from './utils/logic'
 import useTimer from './composables/useTimer'
 
 const statuses = {
